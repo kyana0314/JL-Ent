@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JL Ent.</title>
+  <style>
+    html { scroll-behavior: smooth; }
+    * {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    body {
+      background-color: #0e0e0e;
+      color: white;
+      line-height: 1.6;
+    }
+    header {
+      background: black;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.5em;
+      letter-spacing: 2px;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      background: #111;
+      padding: 15px 0;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    nav a:hover { color: #ccc; }
+
+    #mainImage {
+      max-width: 2000px;
+      margin: 40px auto 20px auto;
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.7);
+      user-select: none;
+    }
+    #mainImage img {
+      width: 100%; height: 500px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .about, .artists, .creators {
+      padding: 80px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .about h2, .artists h2, .creators h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      border-bottom: 2px solid white;
+      display: inline-block;
+    }
+    .artists-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+    .artist {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .artist:hover { transform: scale(1.03); }
+    .artist a {
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+      display: block;
+    }
+    .artist img {
+      width: 100%; height: auto;
+      border-radius: 10px;
+    }
+    footer {
+      text-align: center;
+      padding: 30px;
+      background: #111;
+      color: #888;
+      font-size: 0.9em;
+      line-height: 1.8;
+    }
+
+    #profileModal {
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      pointer-events: none;
+    }
+    #profileModal.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    #profileModal .modal-content {
+      position: relative;
+      background: rgba(30,30,30,0.85);
+      max-width: 1000px;
+      width: 80vw;
+      aspect-ratio: 16 / 9;
+      border: 2px solid white;
+      border-radius: 12px;
+      display: flex;
+      color: white;
+      overflow: hidden;
+      padding: 0;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    #profileModal.open .modal-content { transform: scale(1); }
+    #profileModal .modal-content::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: cover;
+      background-position: center;
+      background-image: var(--bg-image);
+      filter: brightness(0.8);
+      border-radius: 12px;
+      z-index: 0;
+    }
+    #profileModal .modal-text {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      padding: 40px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+      text-align: left;
+    }
+    #profileModal h2 {
+      font-size: 2.2em;
+      margin: 0;
+      border-bottom: 2px solid white;
+      padding-bottom: 8px;
+    }
+    #profileModal p {
+      white-space: pre-line;
+      line-height: 1.6;
+      font-size: 1.1em;
+    }
+    #profileModal .modal-close {
+      position: absolute;
+      top: 15px; right: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      line-height: 36px;
+      text-align: center;
+    }
+    #youtubeLinkBox, #chzzkLinkBox, #soopLinkBox, #instagramLinkBox, #twitterLinkBox {
+      width: 180px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 1.1em;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition:
+        background-color 0.3s ease,
+        box-shadow 0.3s ease,
+        color 0.3s ease,
+        transform 0.15s ease;
+      color: white;
+      text-decoration: none;
+      display: none;
+      z-index: 2;
+      background-color: rgba(255,255,255,0.12);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-sizing: border-box;
+    }
+
+    #youtubeLinkBox:hover,
+    #chzzkLinkBox:hover,
+    #soopLinkBox:hover,
+    #instagramLinkBox:hover,
+    #twitterLinkBox:hover {
+      filter: brightness(1.2);
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    #youtubeLinkBox:active,
+    #chzzkLinkBox:active,
+    #soopLinkBox:active,
+    #instagramLinkBox:active,
+    #twitterLinkBox:active,
+    .btn-click-effect {
+      transform: scale(0.93) !important;
+      transition: transform 0.15s ease;
+    }
+
+    @media (max-width: 768px) {
+      #profileModal .modal-content {
+        flex-direction: column;
+        width: 95vw;
+        aspect-ratio: auto;
+        height: auto;
+        max-height: 90vh;
+        padding: 10px;
+      }
+      #profileModal .modal-text {
+        padding: 20px;
+        width: 100%;
+        text-align: center;
+      }
+      #profileModal .modal-text h2 {
+        font-size: 1.8em;
+      }
+      #profileModal .modal-text p {
+        font-size: 1em;
+      }
+      #profileModal .modal-image {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+      }
+      #profileModal .modal-image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+      }
+      #youtubeLinkBox, #chzzkLinkBox, #soopLinkBox, #instagramLinkBox, #twitterLinkBox {
+        width: 140px;
+        font-size: 1em;
+        margin: 6px auto;
+      }
+      nav {
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 10px 0;
+      }
+      nav a {
+        font-size: 0.9em;
+      }
+      #mainImage img {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>JL Ent.</h1>
+  </header>
+  <nav>
+    <a href="#about">ABOUT</a>
+    <a href="#artists">ARTISTS</a>
+    <a href="#creators">CREATORS</a>
+  </nav>
+  <section id="mainImage">
+    <img src="test.jpg" alt="메인" />
+  </section>
+
+  <section class="about" id="about">
+    <h2>ABOUT</h2>
+    <p>
+      JL Ent.는 다음으로 향하는 새로운 길입니다.<br />
+      아티스트와 크리에이터의 재능을 발굴하고, 다양한 무대를 통해 그들의 열정을 세상과 연결하는 종합 엔터테인먼트 기업입니다.
+    </p>
+  </section>
+
+  <section class="artists" id="artists">
+    <h2>ARTISTS</h2>
+    <div class="artists-grid">
+      <div class="artist">
+        <a href="#" class="profile-link"
+           data-name="artist1"
+           data-desc="test message"
+           data-url="https://www.youtube.com/"
+           data-chzzk=""
+           data-soop=""
+           data-instagram=""
+           data-twitter=""
+           data-img=""
+           data-gif=""
+           data-buttoncolor="#ff66cc">
+          <img src="" alt="artist1" />
+          <h3>artist1</h3>
+        </a>    
+      </div>
+      <div class="artist">
+        <a href="#" class="profile-link"
+           data-name="artist2"
+           data-desc="test message"
+           data-url="https://www.youtube.com/"
+           data-chzzk=""
+           data-soop=""
+           data-instagram=""
+           data-twitter=""
+           data-img=""
+           data-gif=""
+           data-buttoncolor="#ff66cc">
+          <img src="" alt="artist2" />
+          <h3>artist2</h3>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="creators" id="creators">
+    <h2>CREATORS</h2>
+    <div class="artists-grid">
+      <div class="artist">
+        <a href="#" class="profile-link"
+           data-name="creators1"
+           data-desc="Hello word! <br>test message"
+           data-url="https://www.youtube.com/"
+           data-chzzk="https://chzzk.naver.com/"
+           data-soop="https://www.sooplive.co.kr/"
+           data-instagram="https://www.instagram.com/"
+           data-twitter="https://x.com/"
+           data-img="test.gif"
+           data-gif="test.gif"
+           data-buttoncolor="#ff66cc">
+          <img src="test.gif" alt="creators1" />
+          <h3>creators1</h3>
+        </a>
+      </div>
+      <div class="artist">
+        <a href="#" class="profile-link"
+           data-name="creators2"
+           data-desc="Hello word!"
+           data-url="https://www.youtube.com/"
+           data-chzzk="https://chzzk.naver.com/"
+           data-soop=""
+           data-instagram=""
+           data-twitter=""
+           data-img="test.jpg"
+           data-gif=""
+           data-buttoncolor="#669966">
+          <img src="test.jpg" alt="creators2" />
+          <h3>creators2</h3>
+        </a>
+      </div>
+      <div class="artist">
+        <a href="#" class="profile-link"
+           data-name="creators3"
+           data-desc="Hello word!"
+           data-url="https://www.youtube.com/"
+           data-chzzk=""
+           data-soop=""
+           data-instagram="https://www.instagram.com/"
+           data-twitter=""
+           data-img="test.png"
+           data-gif=""
+           data-buttoncolor="#6666cc">
+          <img src="test.png" alt="creators3" />
+          <h3>creators3</h3>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    상호: 제이엘엔터테인먼트 | 대표: 지윤서 | 사업자등록번호: 470-07-03641<br />
+    주소: 서울특별시 강서구 강서로47길 165, 9층 901-656호(내발산동, 신원메디칼프라자)<br />
+    E-mail: jiysoffice@icloud.com<br />
+  </footer>
+
+  <div id="profileModal">
+    <div class="modal-content">
+      <span class="modal-close" role="button" aria-label="모달 닫기">&times;</span>
+      <div class="modal-text">
+        <h2 id="modalName"></h2>
+        <p id="modalDesc"></p>
+        <a href="#" target="_blank" id="youtubeLinkBox">유튜브</a>
+        <a href="#" target="_blank" id="chzzkLinkBox">치지직</a>
+        <a href="#" target="_blank" id="soopLinkBox">soop</a>
+        <a href="#" target="_blank" id="instagramLinkBox">인스타그램</a>
+        <a href="#" target="_blank" id="twitterLinkBox">트위터</a>
+      </div>
+      <div class="modal-image">
+        <img id="modalImg" src="" alt="프로필 이미지" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('profileModal');
+    const modalName = document.getElementById('modalName');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalImg = document.getElementById('modalImg');
+    const modalContent = document.querySelector('#profileModal .modal-content');
+    const modalClose = document.querySelector('.modal-close');
+
+    const youtubeLinkBox = document.getElementById('youtubeLinkBox');
+    const chzzkLinkBox = document.getElementById('chzzkLinkBox');
+    const soopLinkBox = document.getElementById('soopLinkBox');
+    const instagramLinkBox = document.getElementById('instagramLinkBox');
+    const twitterLinkBox = document.getElementById('twitterLinkBox');
+
+    document.querySelectorAll('.profile-link').forEach(link => {
+      const img = link.querySelector('img');
+      const originalSrc = img.src;
+      const gifSrc = link.dataset.gif;
+
+      if (gifSrc) {
+        link.addEventListener('mouseenter', () => img.src = gifSrc);
+        link.addEventListener('mouseleave', () => img.src = originalSrc);
+      }
+
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        modalName.textContent = link.dataset.name;
+        modalDesc.innerHTML = link.dataset.desc;
+        modalImg.src = link.dataset.img;
+        modalImg.alt = link.dataset.name;
+        modalContent.style.setProperty('--bg-image', `url('${link.dataset.img}')`);
+
+        const toggleLink = (el, url) => {
+          if (url && url.trim() !== '') {
+            el.style.display = 'inline-block';
+            el.href = url;
+          } else {
+            el.style.display = 'none';
+          }
+        };
+
+        toggleLink(youtubeLinkBox, link.dataset.url);
+        toggleLink(chzzkLinkBox, link.dataset.chzzk);
+        toggleLink(soopLinkBox, link.dataset.soop);
+        toggleLink(instagramLinkBox, link.dataset.instagram);
+        toggleLink(twitterLinkBox, link.dataset.twitter);
+
+        [youtubeLinkBox, chzzkLinkBox, soopLinkBox, instagramLinkBox, twitterLinkBox].forEach(btn => {
+          if (btn.style.display !== 'none') {
+            btn.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
+            btn.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.15)';
+            btn.style.color = 'white';
+
+            btn.addEventListener('click', () => {
+              btn.classList.add('btn-click-effect');
+              setTimeout(() => btn.classList.remove('btn-click-effect'), 150);
+            });
+          }
+        });
+
+        modal.classList.add('open');
+      });
+    });
+
+    modalClose.onclick = () => modal.classList.remove('open');
+    window.onclick = e => { if (e.target === modal) modal.classList.remove('open'); };
+  </script>
+</body>
+</html>
